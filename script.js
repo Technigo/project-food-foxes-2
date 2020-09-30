@@ -6,13 +6,18 @@ let priceRange = null;
 let goodReviewOnly = null;
 let sortToLowest = null;
 let sortTohighest = null;
+let sortLow = null;
+let sortHigh = null;
+
+const apiKey = "66748116ada83a96ea0d8e2b3c763360"; //Peggy
+const cityID = 91; //Dublin
+const cusineID = 82; //pizza
+const apiURL = `https://developers.zomato.com/api/v2.1/search?entity_id=${cityID}&entity_type=city&cuisines=${cusineID}`;
+
 
 
 const fetchZomato = () => {
-  const apiKey = "66748116ada83a96ea0d8e2b3c763360"; //Peggy
-  const cityID = 91; //Dublin
-  const cusineID = 82; //pizza
-  const apiURL = `https://developers.zomato.com/api/v2.1/search?entity_id=${cityID}&entity_type=city&cuisines=${cusineID}`;
+  
   fetch(apiURL, { headers: { "user-key": apiKey } })
     .then((response) => {
       if (!response.ok) {
@@ -26,6 +31,8 @@ const fetchZomato = () => {
     });
 };
 fetchZomato();
+
+
 // Filter
 const onPriceRangeChange = (target) => {
   priceRange = target.value;
@@ -64,37 +71,37 @@ const printRestorants = (restaurants) => {
   });
 };
 
-
-
 //function sort price
+const ascending = apiURL.concat('&sort=cost&order=asc');
+const descending = apiURL.concat('&sort=cost&order=desc');
+console.log(ascending);
 
-const sortFromLow = (event) => {
-  sortToLowest = target.value;
-  sortbyLowPrice(filterList());
-};
+const sortFromLow = (target) => {
+  sortLow = target.checked;
+  if (sortLow) {
+    return ascending;
+  }
+}
 
-const sortbyLowPrice = () => {
-  const cityID = 91 //Dublin
-  const cusineID = 82 //pizza
-  const API_URL_LOW_PRICE = `https://developers.zomato.com/api/v2.1/search?entity_id=${cityID}&entity_type=city&cuisines=${cusineID}&sort=cost&order=asc`;
-  const apiKey = "66748116ada83a96ea0d8e2b3c763360" //Peggy
-  
-  fetch(API_URL_LOW_PRICE, { headers: { "user-key": apiKey } })
-    .then((response) => {
+const sortFromHigh = (target) => {
+  sortHigh = target.checked;
+ if (sortHigh) {
+   return descending;
+ }
+}
+
+
+const sortPrice = () => {
+  fetch(onSortChange, { headers: { "user-key": apiKey } })
+  .then((response) => {
       if (!response.ok) {
         throw Error(response.statusText)
       }
       return response.json()
     })
-    .then((json) => {
-      restaurantList = json.restaurants;
-      json.restaurants.forEach(place => {
-          
-        console.log(place.restaurant.name);
-        console.log(place.restaurant.average_cost_for_two);
-        console.log(place.restaurant.price_range);
-
-        
-        
-        
-     
+    .then((response) => {
+      restaurantList = response.restaurants;
+      sortFromLow(restaurantList);
+      sortFromHigh(restaurantList);
+    })
+}
